@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect } from "react";
+import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
 
 const TELEGRAM_LINK = "https://t.me/+Oaihgt0GAvgxMTA1";
-const PIXEL_ID = "1063547539604154";
 const HERO_IMG =
   "https://d1yei2z3i6k35z.cloudfront.net/16218780/697d038dcd182_photo_2025-10-1510.05.14.jpeg";
 
@@ -21,42 +21,30 @@ export const Route = createFileRoute("/")({
         content: "10K+ members already joined. Don't wait, join AVIATOR KING™ now.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://beastavator.lovable.app/" },
       { property: "og:image", content: HERO_IMG },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: HERO_IMG },
     ],
     links: [
-      { rel: "canonical", href: "/" },
+      { rel: "canonical", href: "https://beastavator.lovable.app/" },
       {
         rel: "stylesheet",
         href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
-      },
-    ],
-    scripts: [
-      {
-        children: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${PIXEL_ID}');fbq('track','PageView');`,
       },
     ],
   }),
   component: Index,
 });
 
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void;
-  }
-}
-
 function Index() {
-  const clicked = useRef(false);
+  useEffect(() => {
+    ensurePixel();
+  }, []);
 
   const handleJoinClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!clicked.current) {
-      clicked.current = true;
-      window.fbq?.("track", "Subscribe");
-    }
+    trackSubscribe();
     setTimeout(() => {
       window.location.href = TELEGRAM_LINK;
     }, 500);
