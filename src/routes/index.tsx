@@ -21,13 +21,13 @@ export const Route = createFileRoute("/")({
         content: "10K+ members already joined. Don't wait, join AVIATOR KING™ now.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://beastavator.lovable.app/" },
       { property: "og:image", content: HERO_IMG },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: HERO_IMG },
     ],
     links: [
-      { rel: "canonical", href: "/" },
+      { rel: "canonical", href: "https://beastavator.lovable.app/" },
       {
         rel: "stylesheet",
         href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
