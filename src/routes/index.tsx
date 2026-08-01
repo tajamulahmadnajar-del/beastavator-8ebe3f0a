@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect } from "react";
+import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
 
 const TELEGRAM_LINK = "https://t.me/+Oaihgt0GAvgxMTA1";
-const PIXEL_ID = "1063547539604154";
 const HERO_IMG =
   "https://d1yei2z3i6k35z.cloudfront.net/16218780/697d038dcd182_photo_2025-10-1510.05.14.jpeg";
 
@@ -42,21 +42,14 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void;
-  }
-}
-
 function Index() {
-  const clicked = useRef(false);
+  useEffect(() => {
+    ensurePixel();
+  }, []);
 
   const handleJoinClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!clicked.current) {
-      clicked.current = true;
-      window.fbq?.("track", "Subscribe");
-    }
+    trackSubscribe();
     setTimeout(() => {
       window.location.href = TELEGRAM_LINK;
     }, 500);
