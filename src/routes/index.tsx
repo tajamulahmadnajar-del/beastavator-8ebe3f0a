@@ -42,12 +42,10 @@ function Index() {
     ensurePixel();
   }, []);
 
-  const handleJoinClick = (e: React.MouseEvent) => {
+  const handleJoinClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    trackSubscribe();
-    setTimeout(() => {
-      window.location.href = TELEGRAM_LINK;
-    }, 500);
+    await trackSubscribe();
+    window.location.href = TELEGRAM_LINK;
   };
 
   return (

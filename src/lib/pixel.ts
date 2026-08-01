@@ -39,13 +39,53 @@ export function ensurePixel(): void {
   }
 }
 
-/** Fires the standard Subscribe event once, with a dedupe event id. */
-export function trackSubscribe(): void {
+/** Fires an image beacon straight to Meta so the event lands even if fbevents.js is slow/blocked. */
+function beacon(eventName: string, eventId: string): void {
+  const params = new URLSearchParams({
+    id: PIXEL_ID,
+    ev: eventName,
+    dl: window.location.href,
+    rl: document.referrer || "",
+    if: "false",
+    ts: String(Date.now()),
+    eid: eventId,
+    noscript: "1",
+  });
+  const img = new Image(1, 1);
+  img.src = `https://www.facebook.com/tr?${params.toString()}`;
+}
+
+/**
+ * Fires the standard Subscribe event once (dedupe eventID), and resolves once
+ * fbevents.js has actually flushed the queue — so a redirect can't cancel it.
+ */
+export function trackSubscribe(): Promise<void> {
   const w = window as unknown as { __fbSubscribed?: boolean };
-  if (w.__fbSubscribed) return;
+  if (w.__fbSubscribed) return Promise.resolve();
   w.__fbSubscribed = true;
+
   ensurePixel();
+  const eventId = `subscribe_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+
   window.fbq?.("track", "Subscribe", { content_name: "Telegram Channel Join" }, {
-    eventID: `subscribe_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    eventID: eventId,
+  });
+
+  // Guaranteed fallback hit (deduped by eventID on Meta's side).
+  beacon("Subscribe", eventId);
+
+  // Wait until fbevents.js is loaded and the queue is drained (max ~1.5s).
+  return new Promise<void>((resolve) => {
+    const start = Date.now();
+    const check = () => {
+      const fbq = window.fbq as unknown as { callMethod?: unknown; queue?: unknown[] } | undefined;
+      const flushed = !!fbq?.callMethod && (fbq.queue?.length ?? 0) === 0;
+      if (flushed || Date.now() - start > 1500) {
+        resolve();
+        return;
+      }
+      setTimeout(check, 100);
+    };
+    check();
   });
 }
