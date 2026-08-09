@@ -35,12 +35,23 @@ export function ensurePixel(): void {
   if (!w.__fbPixelInit) {
     w.__fbPixelInit = true;
     window.fbq?.("init", PIXEL_ID);
-    window.fbq?.("track", "PageView");
+    const pvId = `pv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    window.fbq?.("track", "PageView", {}, { eventID: pvId });
+    // Guaranteed fallback so PageView lands even if fbevents.js is blocked/slow.
+    beacon("PageView", pvId);
+
+    // Quality signal for cheaper optimisation: who actually saw the offer.
+    const vcId = `vc_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    window.fbq?.("track", "ViewContent", {
+      content_name: "Telegram Channel Join",
+      content_category: "telegram",
+    }, { eventID: vcId });
+    beacon("ViewContent", vcId, { content_name: "Telegram Channel Join" });
   }
 }
 
 /** Fires an image beacon straight to Meta so the event lands even if fbevents.js is slow/blocked. */
-function beacon(eventName: string, eventId: string): void {
+function beacon(eventName: string, eventId: string, custom?: Record<string, string>): void {
   const params = new URLSearchParams({
     id: PIXEL_ID,
     ev: eventName,
@@ -51,6 +62,7 @@ function beacon(eventName: string, eventId: string): void {
     eid: eventId,
     noscript: "1",
   });
+  if (custom) for (const [k, v] of Object.entries(custom)) params.set(`cd[${k}]`, v);
   const img = new Image(1, 1);
   img.src = `https://www.facebook.com/tr?${params.toString()}`;
 }
@@ -67,12 +79,20 @@ export function trackSubscribe(): Promise<void> {
   ensurePixel();
   const eventId = `subscribe_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
-  window.fbq?.("track", "Subscribe", { content_name: "Telegram Channel Join" }, {
-    eventID: eventId,
-  });
+  const payload = {
+    content_name: "Telegram Channel Join",
+    content_category: "telegram",
+    currency: "INR",
+    value: 1,
+    predicted_ltv: 1,
+  };
+  window.fbq?.("track", "Subscribe", payload, { eventID: eventId });
+  // Also a Lead signal — gives Meta a second, cheaper optimisation target.
+  window.fbq?.("track", "Lead", payload, { eventID: `lead_${eventId}` });
 
-  // Guaranteed fallback hit (deduped by eventID on Meta's side).
-  beacon("Subscribe", eventId);
+  // Guaranteed fallback hits (deduped by eventID on Meta's side).
+  beacon("Subscribe", eventId, { content_name: "Telegram Channel Join", currency: "INR", value: "1" });
+  beacon("Lead", `lead_${eventId}`, { content_name: "Telegram Channel Join", currency: "INR", value: "1" });
 
   // Wait until fbevents.js is loaded and the queue is drained (max ~1.5s).
   return new Promise<void>((resolve) => {
