@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
+import heroAsset from "@/assets/aviator-king.jpg.asset.json";
 
 const TELEGRAM_LINK = "https://t.me/+Oaihgt0GAvgxMTA1";
-const HERO_IMG =
-  "https://d1yei2z3i6k35z.cloudfront.net/16218780/697d038dcd182_photo_2025-10-1510.05.14.jpeg";
+const HERO_IMG = heroAsset.url;
+const HERO_ABS = `https://beastavator.lovable.app${heroAsset.url}`;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,9 +23,9 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://beastavator.lovable.app/" },
-      { property: "og:image", content: HERO_IMG },
+      { property: "og:image", content: HERO_ABS },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: HERO_IMG },
+      { name: "twitter:image", content: HERO_ABS },
     ],
     links: [
       { rel: "canonical", href: "https://beastavator.lovable.app/" },
