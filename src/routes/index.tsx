@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
+import heroAsset from "@/assets/aviator-profit-king.jpg.asset.json";
 
 const TELEGRAM_LINK = "https://t.me/+-ZHl3IMhU5JiYjk1";
-const HERO_IMG =
-  "https://d1yei2z3i6k35z.cloudfront.net/16218780/697d038dcd182_photo_2025-10-1510.05.14.jpeg";
-const HERO_ABS = HERO_IMG;
+const HERO_IMG = heroAsset.url;
+const HERO_ABS = `https://beastavator.lovable.app${heroAsset.url}`;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -79,7 +79,7 @@ function Index() {
         <a
           href={TELEGRAM_LINK}
           onClick={handleJoinClick}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand-blue px-4 py-[13px] text-base font-semibold text-foreground shadow-[0_4px_10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-[1.03] hover:bg-brand-blue-hover sm:py-[14px] sm:text-lg"
+          className="join-cta flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand-blue px-4 py-[13px] text-base font-semibold text-foreground transition-colors duration-300 hover:bg-brand-blue-hover sm:py-[14px] sm:text-lg"
         >
           <i className="fab fa-telegram text-lg" aria-hidden="true" />
           JOIN NOW
