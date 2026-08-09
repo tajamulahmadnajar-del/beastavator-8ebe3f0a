@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
 
-const TELEGRAM_LINK = "https://t.me/+Oaihgt0GAvgxMTA1";
+const TELEGRAM_LINK = "https://t.me/+-ZHl3IMhU5JiYjk1";
 const HERO_IMG =
   "https://d1yei2z3i6k35z.cloudfront.net/16218780/697d038dcd182_photo_2025-10-1510.05.14.jpeg";
 const HERO_ABS = HERO_IMG;
