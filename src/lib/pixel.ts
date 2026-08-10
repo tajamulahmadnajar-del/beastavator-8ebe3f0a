@@ -39,34 +39,9 @@ export function ensurePixel(): void {
     window.fbq?.("init", PIXEL_ID);
     const pvId = `pv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     window.fbq?.("track", "PageView", {}, { eventID: pvId });
-    beacon("PageView", pvId);
-
-    const vcId = `vc_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    window.fbq?.("track", "ViewContent", {
-      content_name: "Telegram Channel Join",
-      content_category: "telegram",
-    }, { eventID: vcId });
-    beacon("ViewContent", vcId, { content_name: "Telegram Channel Join" });
 
     captureFbclid();
   }
-}
-
-/** Fires an image beacon straight to Meta so the event lands even if fbevents.js is slow/blocked. */
-function beacon(eventName: string, eventId: string, custom?: Record<string, string>): void {
-  const params = new URLSearchParams({
-    id: PIXEL_ID,
-    ev: eventName,
-    dl: window.location.href,
-    rl: document.referrer || "",
-    if: "false",
-    ts: String(Date.now()),
-    eid: eventId,
-    noscript: "1",
-  });
-  if (custom) for (const [k, v] of Object.entries(custom)) params.set(`cd[${k}]`, v);
-  const img = new Image(1, 1);
-  img.src = `https://www.facebook.com/tr?${params.toString()}`;
 }
 
 function readCookie(name: string): string | null {
