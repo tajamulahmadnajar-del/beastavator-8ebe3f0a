@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      join_clicks: {
+        Row: {
+          capi_response: string | null
+          capi_status: string | null
+          client_ip: string | null
+          client_user_agent: string | null
+          created_at: string
+          event_id: string
+          event_source_url: string | null
+          external_id: string | null
+          fbc: string | null
+          fbp: string | null
+          id: string
+          invite_link: string
+          joined_at: string | null
+          telegram_user_id: number | null
+        }
+        Insert: {
+          capi_response?: string | null
+          capi_status?: string | null
+          client_ip?: string | null
+          client_user_agent?: string | null
+          created_at?: string
+          event_id: string
+          event_source_url?: string | null
+          external_id?: string | null
+          fbc?: string | null
+          fbp?: string | null
+          id?: string
+          invite_link: string
+          joined_at?: string | null
+          telegram_user_id?: number | null
+        }
+        Update: {
+          capi_response?: string | null
+          capi_status?: string | null
+          client_ip?: string | null
+          client_user_agent?: string | null
+          created_at?: string
+          event_id?: string
+          event_source_url?: string | null
+          external_id?: string | null
+          fbc?: string | null
+          fbp?: string | null
+          id?: string
+          invite_link?: string
+          joined_at?: string | null
+          telegram_user_id?: number | null
+        }
+        Relationships: []
+      }
+      tg_settings: {
+        Row: {
+          channel_id: number | null
+          channel_title: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          channel_id?: number | null
+          channel_title?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: number | null
+          channel_title?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
