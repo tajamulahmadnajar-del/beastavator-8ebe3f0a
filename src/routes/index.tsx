@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { PIXEL_ID, ensurePixel, getMetaMatchKeys } from "@/lib/pixel";
+import { createJoinLink } from "@/lib/join.functions";
+import { TELEGRAM_LINK } from "@/lib/pixel-config";
 import heroAsset from "@/assets/aviator-profit-king.jpg.asset.json";
 
-const TELEGRAM_LINK = "https://t.me/+-ZHl3IMhU5JiYjk1";
 const HERO_IMG = heroAsset.url;
 const HERO_ABS = `https://beastavator.lovable.app${heroAsset.url}`;
 
@@ -39,14 +41,25 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const getJoinLink = useServerFn(createJoinLink);
+  const [busy, setBusy] = useState(false);
+
   useEffect(() => {
     ensurePixel();
   }, []);
 
   const handleJoinClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    await trackSubscribe();
-    window.location.href = TELEGRAM_LINK;
+    if (busy) return;
+    setBusy(true);
+    let target = TELEGRAM_LINK;
+    try {
+      const result = await getJoinLink({ data: getMetaMatchKeys() });
+      if (result?.url) target = result.url;
+    } catch {
+      // fall back to the public invite link
+    }
+    window.location.href = target;
   };
 
   return (
