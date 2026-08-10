@@ -1,4 +1,6 @@
-export const PIXEL_ID = "1063547539604154";
+import { PIXEL_ID } from "./pixel-config";
+
+export { PIXEL_ID };
 
 declare global {
   interface Window {
@@ -37,16 +39,16 @@ export function ensurePixel(): void {
     window.fbq?.("init", PIXEL_ID);
     const pvId = `pv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     window.fbq?.("track", "PageView", {}, { eventID: pvId });
-    // Guaranteed fallback so PageView lands even if fbevents.js is blocked/slow.
     beacon("PageView", pvId);
 
-    // Quality signal for cheaper optimisation: who actually saw the offer.
     const vcId = `vc_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     window.fbq?.("track", "ViewContent", {
       content_name: "Telegram Channel Join",
       content_category: "telegram",
     }, { eventID: vcId });
     beacon("ViewContent", vcId, { content_name: "Telegram Channel Join" });
+
+    captureFbclid();
   }
 }
 
@@ -67,45 +69,37 @@ function beacon(eventName: string, eventId: string, custom?: Record<string, stri
   img.src = `https://www.facebook.com/tr?${params.toString()}`;
 }
 
-/**
- * Fires the standard Subscribe event once (dedupe eventID), and resolves once
- * fbevents.js has actually flushed the queue — so a redirect can't cancel it.
- */
-export function trackSubscribe(): Promise<void> {
-  const w = window as unknown as { __fbSubscribed?: boolean };
-  if (w.__fbSubscribed) return Promise.resolve();
-  w.__fbSubscribed = true;
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]!) : null;
+}
 
-  ensurePixel();
-  const eventId = `subscribe_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+/** Builds an _fbc value from the ad click id if fbevents.js hasn't written the cookie yet. */
+function captureFbclid(): void {
+  const fbclid = new URLSearchParams(window.location.search).get("fbclid");
+  if (!fbclid || readCookie("_fbc")) return;
+  const value = `fb.1.${Date.now()}.${fbclid}`;
+  document.cookie = `_fbc=${value}; path=/; max-age=${60 * 60 * 24 * 90}`;
+}
 
-  const payload = {
-    content_name: "Telegram Channel Join",
-    content_category: "telegram",
-    currency: "INR",
-    value: 1,
-    predicted_ltv: 1,
+/** Stable per-browser id used as an extra Meta match key. */
+function getExternalId(): string {
+  const key = "ak_ext_id";
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = `ext_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
+/** Browser-side Meta match keys, sent to the server so the real join can be attributed. */
+export function getMetaMatchKeys() {
+  if (typeof window === "undefined") return {};
+  return {
+    fbp: readCookie("_fbp"),
+    fbc: readCookie("_fbc"),
+    externalId: getExternalId(),
+    eventSourceUrl: window.location.href,
   };
-  window.fbq?.("track", "Subscribe", payload, { eventID: eventId });
-  // Also a Lead signal — gives Meta a second, cheaper optimisation target.
-  window.fbq?.("track", "Lead", payload, { eventID: `lead_${eventId}` });
-
-  // Guaranteed fallback hits (deduped by eventID on Meta's side).
-  beacon("Subscribe", eventId, { content_name: "Telegram Channel Join", currency: "INR", value: "1" });
-  beacon("Lead", `lead_${eventId}`, { content_name: "Telegram Channel Join", currency: "INR", value: "1" });
-
-  // Wait until fbevents.js is loaded and the queue is drained (max ~1.5s).
-  return new Promise<void>((resolve) => {
-    const start = Date.now();
-    const check = () => {
-      const fbq = window.fbq as unknown as { callMethod?: unknown; queue?: unknown[] } | undefined;
-      const flushed = !!fbq?.callMethod && (fbq.queue?.length ?? 0) === 0;
-      if (flushed || Date.now() - start > 1500) {
-        resolve();
-        return;
-      }
-      setTimeout(check, 100);
-    };
-    check();
-  });
 }
