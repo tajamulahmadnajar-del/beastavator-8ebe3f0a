@@ -47,12 +47,12 @@ export const createJoinLink = createServerFn({ method: "POST" })
       const { error } = await supabaseAdmin.from("join_clicks").insert({
         invite_link: invite.invite_link,
         event_id: eventId,
-        fbp: data.fbp,
-        fbc: data.fbc,
-        external_id: data.externalId,
+        fbp: data.fbp ?? null,
+        fbc: data.fbc ?? null,
+        external_id: data.externalId ?? null,
         client_user_agent: getRequestHeader("user-agent") ?? null,
         client_ip: getRequestIP({ xForwardedFor: true }) ?? null,
-        event_source_url: data.eventSourceUrl,
+        event_source_url: data.eventSourceUrl ?? null,
       });
       if (error) {
         console.error("join_clicks insert failed:", error.message);
