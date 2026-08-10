@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { PIXEL_ID, ensurePixel, getMetaMatchKeys } from "@/lib/pixel";
 import { createJoinLink } from "@/lib/join.functions";
 import { TELEGRAM_LINK } from "@/lib/pixel-config";
-import heroAsset from "@/assets/aviator-profit-king.jpg.asset.json";
+import heroAsset from "@/assets/aviator-channel.jpg.asset.json";
 
 const HERO_IMG = heroAsset.url;
 const HERO_ABS = `https://beastavator.lovable.app${heroAsset.url}`;
