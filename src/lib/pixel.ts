@@ -44,10 +44,22 @@ export function ensurePixel(): void {
   }
 }
 
-/** Records one Subscribe conversion immediately before opening Telegram. */
+const SUBSCRIBE_KEY = "av_subscribe_fired";
+
+/** Records one Subscribe conversion per session, immediately before opening Telegram. */
 export function trackSubscribe(): void {
   if (typeof window === "undefined") return;
   ensurePixel();
+
+  // Session-level guard: prevents duplicate Subscribe events on repeat clicks,
+  // back-navigation or page reloads (keeps cost per result accurate).
+  try {
+    if (window.sessionStorage.getItem(SUBSCRIBE_KEY)) return;
+    window.sessionStorage.setItem(SUBSCRIBE_KEY, "1");
+  } catch {
+    /* storage blocked — fall through and fire once */
+  }
+
   const eventId = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
   window.fbq?.(
     "track",

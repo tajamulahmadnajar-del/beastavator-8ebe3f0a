@@ -84,10 +84,6 @@ function Index() {
       </section>
 
       <section className="relative mx-auto w-full max-w-md px-5 pb-8 pt-7 text-center">
-        <p className="mx-auto mb-6 max-w-sm text-[15px] leading-6 text-muted-foreground">
-          Daily updates aur instant alerts seedha Telegram par. Free access ke liye abhi channel join karein.
-        </p>
-
         <div className="mb-7 grid grid-cols-2 gap-3">
           <div className="proof-item flex min-h-20 items-center gap-3 rounded-lg border border-border bg-surface px-3 text-left">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary" aria-hidden="true">
