@@ -44,6 +44,24 @@ export function ensurePixel(): void {
   }
 }
 
+/** Records one Subscribe conversion immediately before opening Telegram. */
+export function trackSubscribe(): void {
+  if (typeof window === "undefined") return;
+  ensurePixel();
+  const eventId = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  window.fbq?.(
+    "track",
+    "Subscribe",
+    {
+      content_name: "Telegram Channel Join",
+      content_category: "telegram",
+      currency: "INR",
+      value: 1,
+    },
+    { eventID: eventId },
+  );
+}
+
 function readCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return match ? decodeURIComponent(match[1]!) : null;
@@ -57,24 +75,3 @@ function captureFbclid(): void {
   document.cookie = `_fbc=${value}; path=/; max-age=${60 * 60 * 24 * 90}`;
 }
 
-/** Stable per-browser id used as an extra Meta match key. */
-function getExternalId(): string {
-  const key = "ak_ext_id";
-  let id = localStorage.getItem(key);
-  if (!id) {
-    id = `ext_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
-    localStorage.setItem(key, id);
-  }
-  return id;
-}
-
-/** Browser-side Meta match keys, sent to the server so the real join can be attributed. */
-export function getMetaMatchKeys() {
-  if (typeof window === "undefined") return {};
-  return {
-    fbp: readCookie("_fbp"),
-    fbc: readCookie("_fbc"),
-    externalId: getExternalId(),
-    eventSourceUrl: window.location.href,
-  };
-}
