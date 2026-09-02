@@ -39,10 +39,21 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const leaving = useRef(false);
+  const [secondsLeft, setSecondsLeft] = useState(120);
 
   useEffect(() => {
     ensurePixel();
   }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setSecondsLeft((s) => (s <= 0 ? 120 : s - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
 
   const handleJoinClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
