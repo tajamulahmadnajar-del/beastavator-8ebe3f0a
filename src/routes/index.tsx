@@ -109,6 +109,12 @@ function Index() {
           </div>
         </div>
 
+        <div className="mb-4 flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-3">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+          <span className="text-xs font-bold uppercase text-muted-foreground">Offer expires in</span>
+          <span className="countdown font-heading text-lg font-extrabold tabular-nums text-primary">{mm}:{ss}</span>
+        </div>
+
         <a href={TELEGRAM_LINK} onClick={handleJoinClick} className="join-cta group flex w-full items-center justify-center gap-3 rounded-lg bg-primary px-5 py-4 text-lg font-extrabold text-primary-foreground shadow-cta transition-colors hover:bg-primary-hover active:scale-[0.98]">
           <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current" aria-hidden="true"><path d="M21.9 3.2 18.7 19c-.2 1.1-.9 1.4-1.8.9l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9-8.1c.4-.4-.1-.6-.6-.2L6.3 12.7 1.5 11.2c-1-.3-1.1-1 .2-1.5L20.5 2.5c.9-.3 1.7.2 1.4.7Z" /></svg>
           JOIN TELEGRAM NOW
