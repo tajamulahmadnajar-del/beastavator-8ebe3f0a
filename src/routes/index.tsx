@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
 import { TELEGRAM_LINK } from "@/lib/pixel-config";
-import heroAsset from "@/assets/aviator-telegram.png.asset.json";
 
-const HERO_IMG = heroAsset.url;
-const HERO_ABS = `https://beastavator.lovable.app${heroAsset.url}`;
+const HERO_IMG = "/aviator-telegram.png";
+const HERO_ABS = "https://beastavator.lovable.app/aviator-telegram.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
