@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
 import { TELEGRAM_LINK } from "@/lib/pixel-config";
-import heroAsset from "@/assets/aviator-telegram.png.asset.json";
 
-const HERO_IMG = heroAsset.url;
-const HERO_ABS = `https://beastavator.lovable.app${heroAsset.url}`;
+const HERO_IMG = "/aviator-telegram.png";
+const HERO_ABS = "https://beastavator.lovable.app/aviator-telegram.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,10 +39,21 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const leaving = useRef(false);
+  const [secondsLeft, setSecondsLeft] = useState(120);
 
   useEffect(() => {
     ensurePixel();
   }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setSecondsLeft((s) => (s <= 0 ? 120 : s - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
 
   const handleJoinClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -97,6 +107,12 @@ function Index() {
             </span>
             <span><strong className="block text-sm">Instant Alerts</strong><small className="text-[11px] text-muted-foreground">Direct updates</small></span>
           </div>
+        </div>
+
+        <div className="mb-4 flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-3">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 text-primary" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+          <span className="text-xs font-bold uppercase text-muted-foreground">Offer expires in</span>
+          <span className="countdown font-heading text-lg font-extrabold tabular-nums text-primary">{mm}:{ss}</span>
         </div>
 
         <a href={TELEGRAM_LINK} onClick={handleJoinClick} className="join-cta group flex w-full items-center justify-center gap-3 rounded-lg bg-primary px-5 py-4 text-lg font-extrabold text-primary-foreground shadow-cta transition-colors hover:bg-primary-hover active:scale-[0.98]">
