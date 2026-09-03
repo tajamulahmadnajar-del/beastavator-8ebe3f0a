@@ -46,21 +46,26 @@ export function ensurePixel(): void {
 
 const SUBSCRIBE_KEY = "av_subscribe_fired";
 
-/** Records one Subscribe conversion per session, immediately before opening Telegram. */
-export function trackSubscribe(): void {
-  if (typeof window === "undefined") return;
+/**
+ * Records one Subscribe conversion per session, immediately before opening Telegram.
+ * Resolves once the event has actually left the browser (or after a short timeout),
+ * so the redirect never cancels the request.
+ */
+export function trackSubscribe(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
   ensurePixel();
 
   // Session-level guard: prevents duplicate Subscribe events on repeat clicks,
   // back-navigation or page reloads (keeps cost per result accurate).
   try {
-    if (window.sessionStorage.getItem(SUBSCRIBE_KEY)) return;
+    if (window.sessionStorage.getItem(SUBSCRIBE_KEY)) return Promise.resolve();
     window.sessionStorage.setItem(SUBSCRIBE_KEY, "1");
   } catch {
     /* storage blocked — fall through and fire once */
   }
 
   const eventId = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+
   window.fbq?.(
     "track",
     "Subscribe",
@@ -72,6 +77,47 @@ export function trackSubscribe(): void {
     },
     { eventID: eventId },
   );
+
+  // Fallback beacon with the SAME eventID: if fbevents.js is slow, blocked or the
+  // tab unloads first, Meta still receives the event and dedupes it against the
+  // browser event, so no double counting.
+  return sendBeacon(eventId);
+}
+
+function sendBeacon(eventId: string): Promise<void> {
+  const params = new URLSearchParams({
+    id: PIXEL_ID,
+    ev: "Subscribe",
+    dl: window.location.href,
+    rl: document.referrer || "",
+    if: "false",
+    ts: String(Date.now()),
+    eid: eventId,
+    "cd[content_name]": "Telegram Channel Join",
+    "cd[content_category]": "telegram",
+    "cd[currency]": "INR",
+    "cd[value]": "1",
+    noscript: "1",
+  });
+  const url = `https://www.facebook.com/tr?${params.toString()}`;
+
+  return new Promise<void>((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve();
+    };
+    window.setTimeout(finish, 700);
+    try {
+      const img = new Image(1, 1);
+      img.onload = finish;
+      img.onerror = finish;
+      img.src = url;
+    } catch {
+      finish();
+    }
+  });
 }
 
 function readCookie(name: string): string | null {
