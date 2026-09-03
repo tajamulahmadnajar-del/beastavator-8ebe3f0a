@@ -55,11 +55,13 @@ function Index() {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
 
-  const handleJoinClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleJoinClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (leaving.current) return;
     leaving.current = true;
-    await trackSubscribe();
+    // Conversion is counted only when the visitor really leaves for Telegram,
+    // so misclicks don't inflate cost. Redirect happens instantly.
+    armSubscribeOnLeave();
     window.location.href = TELEGRAM_LINK;
   };
 
