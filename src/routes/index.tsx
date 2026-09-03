@@ -55,14 +55,12 @@ function Index() {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
 
-  const handleJoinClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleJoinClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (leaving.current) return;
     leaving.current = true;
-    trackSubscribe();
-    window.setTimeout(() => {
-      window.location.href = TELEGRAM_LINK;
-    }, 220);
+    await trackSubscribe();
+    window.location.href = TELEGRAM_LINK;
   };
 
   return (
