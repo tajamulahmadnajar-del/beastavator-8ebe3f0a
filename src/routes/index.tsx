@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { PIXEL_ID, armSubscribeOnLeave, ensurePixel } from "@/lib/pixel";
+import { PIXEL_ID, ensurePixel, trackSubscribe } from "@/lib/pixel";
 import { TELEGRAM_LINK } from "@/lib/pixel-config";
 
 const HERO_IMG = "/aviator-telegram.png";

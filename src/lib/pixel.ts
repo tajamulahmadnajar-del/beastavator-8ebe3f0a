@@ -84,43 +84,6 @@ export function trackSubscribe(): Promise<void> {
   return sendBeacon(eventId);
 }
 
-/**
- * Quality gate for ad cost: instead of counting every button press, the Subscribe
- * event is only sent once the visitor actually leaves this page for Telegram
- * (tab hidden or page unloading). Misclicks and visitors without Telegram never
- * produce a conversion, so Meta optimises towards people who really open the
- * channel and the cost per real subscriber drops.
- */
-export function armSubscribeOnLeave(): void {
-  if (typeof window === "undefined") return;
-  ensurePixel();
-
-  let fired = false;
-  const fire = () => {
-    if (fired) return;
-    fired = true;
-    cleanup();
-    void trackSubscribe();
-  };
-
-  const onVisibility = () => {
-    if (document.visibilityState === "hidden") fire();
-  };
-  const cleanup = () => {
-    document.removeEventListener("visibilitychange", onVisibility);
-    window.removeEventListener("pagehide", fire);
-    window.removeEventListener("blur", fire);
-  };
-
-  document.addEventListener("visibilitychange", onVisibility);
-  window.addEventListener("pagehide", fire);
-  window.addEventListener("blur", fire);
-
-  // Safety net: if the browser never reports a leave (some in-app browsers),
-  // still count the intent after 6s so real joins are not lost.
-  window.setTimeout(fire, 6000);
-}
-
 function sendBeacon(eventId: string): Promise<void> {
   const params = new URLSearchParams({
     id: PIXEL_ID,
