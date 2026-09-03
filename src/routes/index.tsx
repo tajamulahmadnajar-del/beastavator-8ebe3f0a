@@ -59,6 +59,8 @@ function Index() {
     e.preventDefault();
     if (leaving.current) return;
     leaving.current = true;
+    // Conversion leaves the browser first (sendBeacon = instant), then we redirect,
+    // so no event is lost and no event is counted twice.
     await trackSubscribe();
     window.location.href = TELEGRAM_LINK;
   };

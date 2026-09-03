@@ -101,6 +101,13 @@ function sendBeacon(eventId: string): Promise<void> {
   });
   const url = `https://www.facebook.com/tr?${params.toString()}`;
 
+  // sendBeacon survives page unload / app switch, so the event is never cancelled.
+  try {
+    if (navigator.sendBeacon?.(url)) return Promise.resolve();
+  } catch {
+    /* fall through to the image beacon */
+  }
+
   return new Promise<void>((resolve) => {
     let done = false;
     const finish = () => {
