@@ -88,22 +88,25 @@ export function trackSubscribe(): Promise<void> {
   return sendBeacon(eventId);
 }
 
-function sendBeacon(eventId: string): Promise<void> {
+function sendBeacon(eventId: string, event: "Subscribe" | "PageView" = "Subscribe"): Promise<void> {
   const params = new URLSearchParams({
     id: PIXEL_ID,
-    ev: "Subscribe",
+    ev: event,
     dl: window.location.href,
     rl: document.referrer || "",
     if: "false",
     ts: String(Date.now()),
     eid: eventId,
-    "cd[content_name]": "Telegram Channel Join",
-    "cd[content_category]": "telegram",
-    "cd[currency]": "INR",
-    "cd[value]": "1",
     noscript: "1",
   });
+  if (event === "Subscribe") {
+    params.set("cd[content_name]", "Telegram Channel Join");
+    params.set("cd[content_category]", "telegram");
+    params.set("cd[currency]", "INR");
+    params.set("cd[value]", "1");
+  }
   const url = `https://www.facebook.com/tr?${params.toString()}`;
+
 
   // sendBeacon survives page unload / app switch, so the event is never cancelled.
   try {
