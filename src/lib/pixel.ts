@@ -36,13 +36,17 @@ export function ensurePixel(): void {
   const w = window as unknown as { __fbPixelInit?: boolean };
   if (!w.__fbPixelInit) {
     w.__fbPixelInit = true;
+    // Capture the ad click id first so _fbc exists before the first event.
+    captureFbclid();
     window.fbq?.("init", PIXEL_ID);
     const pvId = `pv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     window.fbq?.("track", "PageView", {}, { eventID: pvId });
-
-    captureFbclid();
+    // Same-eventID fallback: if fbevents.js is blocked or throttled, Meta still
+    // receives the PageView and dedupes it against the browser event.
+    void sendBeacon(pvId, "PageView");
   }
 }
+
 
 const SUBSCRIBE_KEY = "av_subscribe_fired";
 
