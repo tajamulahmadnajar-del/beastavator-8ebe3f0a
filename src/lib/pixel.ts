@@ -36,13 +36,17 @@ export function ensurePixel(): void {
   const w = window as unknown as { __fbPixelInit?: boolean };
   if (!w.__fbPixelInit) {
     w.__fbPixelInit = true;
+    // Capture the ad click id first so _fbc exists before the first event.
+    captureFbclid();
     window.fbq?.("init", PIXEL_ID);
     const pvId = `pv_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     window.fbq?.("track", "PageView", {}, { eventID: pvId });
-
-    captureFbclid();
+    // Same-eventID fallback: if fbevents.js is blocked or throttled, Meta still
+    // receives the PageView and dedupes it against the browser event.
+    void sendBeacon(pvId, "PageView");
   }
 }
+
 
 const SUBSCRIBE_KEY = "av_subscribe_fired";
 
@@ -84,22 +88,25 @@ export function trackSubscribe(): Promise<void> {
   return sendBeacon(eventId);
 }
 
-function sendBeacon(eventId: string): Promise<void> {
+function sendBeacon(eventId: string, event: "Subscribe" | "PageView" = "Subscribe"): Promise<void> {
   const params = new URLSearchParams({
     id: PIXEL_ID,
-    ev: "Subscribe",
+    ev: event,
     dl: window.location.href,
     rl: document.referrer || "",
     if: "false",
     ts: String(Date.now()),
     eid: eventId,
-    "cd[content_name]": "Telegram Channel Join",
-    "cd[content_category]": "telegram",
-    "cd[currency]": "INR",
-    "cd[value]": "1",
     noscript: "1",
   });
+  if (event === "Subscribe") {
+    params.set("cd[content_name]", "Telegram Channel Join");
+    params.set("cd[content_category]", "telegram");
+    params.set("cd[currency]", "INR");
+    params.set("cd[value]", "1");
+  }
   const url = `https://www.facebook.com/tr?${params.toString()}`;
+
 
   // sendBeacon survives page unload / app switch, so the event is never cancelled.
   try {
