@@ -70,21 +70,10 @@ export function trackSubscribe(): Promise<void> {
 
   const eventId = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
-  window.fbq?.(
-    "track",
-    "Subscribe",
-    {
-      content_name: "Telegram Channel Join",
-      content_category: "telegram",
-      currency: "INR",
-      value: 1,
-    },
-    { eventID: eventId },
-  );
-
-  // Fallback beacon with the SAME eventID: if fbevents.js is slow, blocked or the
-  // tab unloads first, Meta still receives the event and dedupes it against the
-  // browser event, so no double counting.
+  // Send one unload-safe request only. Sending fbq("track") and a second browser
+  // beacon for the same click can still be reported twice by Meta because both
+  // requests originate from the browser (eventID deduplication is primarily for
+  // browser + server pairs).
   return sendBeacon(eventId);
 }
 
